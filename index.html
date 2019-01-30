@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Highlighter</title>
+    <title>Syntax Highlighter</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'nonce-4321' https://cdnjs.cloudflare.com; style-src 'nonce-1234' https://cdnjs.cloudflare.com; img-src data:; base-uri 'none'; default-src 'none'" />
     <meta name="google" content="notranslate" />
     <meta name="theme-color" content="black" />
@@ -21,20 +21,25 @@ html, body {
   overflow: visible;
 }
 .hlform {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: visible;
   padding: 0;
   margin: 0;
+  font-family: sans-serif;
 }
 .hlform .langchoices {
   display: block;
   margin: 0;
   padding: 0;
-  height: 32px;
   background: black;
   color: white;
+}
+.hlform .langchoices:after {
+  content: '';
+  visibility: hidden;
+  clear: both;
 }
 .hlform .langchoices label {
   display: block;
@@ -43,13 +48,13 @@ html, body {
   height: 20px;
   line-height: 20px;
   vertical-align: middle;
+  text-align: center;
   overflow: visible;
   -webkit-transition: background-color 100ms ease-out;
   -ms-transition: background-color 100ms ease-out;
   transition: background-color 100ms ease-out;
 }
 .hlform .langchoices label.selauto {
-  font-family: sans-serif;
   padding-left: 0.2em;
   padding-right: 0.4em;
 }
@@ -80,11 +85,16 @@ html, body {
   vertical-align: middle;
 }
 .hlform .langchoices label.sellang input {
-  display: none;
+  width: 1px; height: 1px;
+  padding: 0; margin: 0;
+  overflow: hidden;
+  clip: rect(1px 1px 1px 1px); /* IE ^7 */
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(1px);
+  opacity: 0;
 }
 .hlform .codearea {
-  position: absolute;
-  left: 0; top: 32px; right: 0; bottom: 0;
+  flex: auto;
   display: block;
   margin: 0;
   padding: 2px;
@@ -98,7 +108,9 @@ html, body {
   /*-moz-appearance: textfield-multiline;
   -webkit-appearance: textarea;*/
 }
-.hlform .codearea:empty::before {
+    /*]]>*/--></style>
+    <style type="text/css" nonce="1234" media="screen"><!--/*--><![CDATA[/*><!--*/
+.hlform .codearea:empty:before {
   content: "Enter text here..";
   color: gray;
 }
@@ -254,12 +266,13 @@ html, body {
         }
 
         function newLangChoiceElem(lang, checked, onChange) {
-          var title = lang == null ? 'Auto' : lang;
           var input = document.createElement('input');
           input.type = lang == null ? 'checkbox' : 'radio';
           input.name = lang == null ? 'langauto' : 'lang';
           input.checked = checked;
-          input.title = title;
+          input.title = lang == null
+            ? 'Check me to let it detect and auto-select what language the code is in'
+            : 'Check me to select language "' + lang + '"';
           input.addEventListener('change', function () {
             if (lang == null) onChange(input.checked);
             else if (input.checked) onChange(lang);
@@ -267,9 +280,9 @@ html, body {
           var label = document.createElement('label');
           label.className = (lang == null ? 'selauto' : 'sellang sel-' + lang) +
             (checked ? ' active' : '');
-          if (lang != null) label.title = title;
+          label.title = lang == null ? 'Auto' : lang;
           label.appendChild(input);
-          if (lang == null) label.appendChild(document.createTextNode(title));
+          if (lang == null) label.appendChild(document.createTextNode('Auto'));
           return { name: lang, container: label, element: input };
         }
 
@@ -436,8 +449,8 @@ html, body {
             if (reqRender) render();
           });
           render();
-          codeElem.contentEditable = true;
           codeElem.spellcheck = false;
+          codeElem.contentEditable = true;
           codeElem.focus();
         }
 
@@ -462,9 +475,9 @@ html, body {
       /*]]>*/--></style>
     </head>
   <body>
-    <form class="hlform">
-      <div class="langchoices"></div>
-      <div class="codearea"></div>
+    <form class="hlform" title="Syntax highlighter form">
+      <div class="langchoices" title="Select a language the code snippet is in"></div>
+      <div class="codearea" title="Paste some code snippet here to get it highlighted, then select all &amp; copy."></div>
     </form>
   </body>
 </html>

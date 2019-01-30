@@ -116,6 +116,19 @@ html, body {
           /* return console.log.apply(console, arguments); /* */
         }
 
+        var repeatStr =
+          typeof ''.repeat === 'function' && ' '.repeat(4) === '    ' ? 
+          function repeatStr(x, n) { return (''+x).repeat(n); } :
+          function repeatStr(x, n) {
+            x = ''+x; n = +n;
+            if (n < 0) throw new RangeError('repeat count must be non-negative');
+            if (n >= 1e999) throw new RangeError('repeat count must be less than infinity');
+            if (n >= (1 << 28) || x.length * (n |= 0) >= (1 << 28)) throw new RangeError('repeat count too large');
+            for (var d = ''; ((n & 1) && (d += x), (n >>>= 1)); x += x)
+              ;
+            return d;
+          };
+
         function nodeEndsWithLn(node) {
           var cur = node;
           while (cur != null) {
@@ -383,8 +396,7 @@ html, body {
                   tt.className = '';
                   var amount = INDENT - getColumn(codeElem, tt) % INDENT;
                   tt.parentNode.removeChild(tt);
-                  var ind = new Array(1 + amount).join(' ');
-                  document.execCommand('insertHTML', false, ind);
+                  document.execCommand('insertHTML', false, repeatStr(' ', amount));
                 }
               }
               ev.preventDefault();
